@@ -38,5 +38,5 @@ run: all
 
 clean:
 	make -C boot clean
-	make -C kernel clean
+	make -C kernel32 clean
 	rm -f Disk.img

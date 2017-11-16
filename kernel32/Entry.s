@@ -29,11 +29,12 @@ PROTECTED_MODE:
 	mov esp, 0xFFFE
 	mov ebp, 0xFFFE
 
-	push (SWITCH_SUCCESS_MESSAGE - $$ + 0x10000)
+	push (PASS_MESSAGE - $$ + 0x10000)
 	push 2
-	push 0
+	push 45
+	push 0x0A
 	call PRINT_MESSAGE
-	add esp, 12
+	add esp, 16
 
 	jmp $
 
@@ -46,17 +47,18 @@ PRINT_MESSAGE:
 	push ecx
 	push edx
 
-	mov eax, dword [ebp + 12]
+	mov eax, dword [ebp + 16]
 	mov esi, 160
 	mul esi
 	mov edi, eax
 
-	mov eax, dword [ebp + 8]
+	mov eax, dword [ebp + 12]
 	mov esi, 2
 	mul esi
 	add edi, eax
 
-	mov esi, dword [ebp + 16]
+	mov esi, dword [ebp + 20]
+	mov eax, dword [ebp + 8]
 
 .MESSAGE_LOOP:
 	mov cl, byte [esi]
@@ -65,6 +67,7 @@ PRINT_MESSAGE:
 	je .MESSAGE_END
 
 	mov byte [edi + 0xB8000], cl
+	mov byte [edi + 0xB8000 + 1], al
 
 	add esi, 1
 	add edi, 2
@@ -114,7 +117,9 @@ GDT:
 		db 0x00
 
 GDT_END:
-	
-SWITCH_SUCCESS_MESSAGE:		db 'Switch To Protected Mode Success', 0
+
+PASS_MESSAGE:		db 'PASS', 0
+FAIL_MESSAGE:		db 'FAIL', 0
+
 
 times 512 - ($ - $$) db 0x00

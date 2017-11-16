@@ -22,7 +22,7 @@ START:
 
 .SCREEN_CLEAR_LOOP:
 	mov byte [es:si], 0
-	mov byte [es:si+1], 0x0A
+	mov byte [es:si+1], 0x07
 
 	add si, 2
 
@@ -32,14 +32,16 @@ START:
 	push BOOTLOADER_START_MESSAGE
 	push 0
 	push 0
+	push 0x07
 	call PRINT_MESSAGE
-	add sp, 6
+	add sp, 8
 
 	push START_LOADING_IMAGE_MESSAGE
 	push 1
 	push 0
+	push 0x07
 	call PRINT_MESSAGE
-	add sp, 6
+	add sp, 8
 
 RESET_DISK:
 	mov ax, 0
@@ -86,18 +88,27 @@ READ_DATA:
 	jmp READ_DATA
 
 READ_END:
-	push IMAGE_LOADING_COMPLETE_MESSAGE
+	push PASS_MESSAGE
 	push 1
-	push 20
+	push 45
+	push 0x0A
 	call PRINT_MESSAGE
-	add sp, 6
+	add sp, 8
+
+	push SWITCH_MODE_MESSAGE
+	push 2
+	push 0
+	push 0x07
+	call PRINT_MESSAGE
+	add sp, 8
 
 	jmp 0x1000:0x0000
 
 DISK_ERROR_HANDLER:
-	push DISK_ERROR_MESSAGE
+	push ERROR_MESSAGE
 	push 1
-	push 20
+	push 45
+	push 0x04
 	call PRINT_MESSAGE
 	
 	jmp $
@@ -117,17 +128,18 @@ PRINT_MESSAGE:
 
 	mov es, ax
 
-	mov ax, word [bp + 6]
+	mov ax, word [bp + 8]
 	mov si, 160
 	mul si
 	mov di, ax
 
-	mov ax, word [bp + 4]
+	mov ax, word [bp + 6]
 	mov si, 2
 	mul si
 	add di, ax
 
-	mov si, word [bp + 8]
+	mov si, word [bp + 10]
+	mov al, byte [bp + 4]
 
 .MESSAGE_LOOP:
 	mov cl, byte [si]
@@ -136,6 +148,7 @@ PRINT_MESSAGE:
 	je .MESSAGE_END
 	
 	mov byte [es:di], cl
+	mov byte [es:di+1], al
 
 	add si, 1
 	add di, 2
@@ -154,9 +167,10 @@ PRINT_MESSAGE:
 
 BOOTLOADER_START_MESSAGE:		db 'Boot Loader Start', 0
 
-DISK_ERROR_MESSAGE:				db '!! Disk Error !!', 0
-START_LOADING_IMAGE_MESSAGE:	db 'OS Image Loading...', 0
-IMAGE_LOADING_COMPLETE_MESSAGE:	db 'Image Loading Complete', 0
+PASS_MESSAGE:					db 'PASS', 0
+ERROR_MESSAGE:  				db 'FAIL', 0
+START_LOADING_IMAGE_MESSAGE:	db 'Operating System Loading....................[    ]', 0
+SWITCH_MODE_MESSAGE:			db 'Switch Real Mode To Protected Mode..........[    ]', 0
 
 SECTOR_NUMBER:					db 0x02
 HEAD_NUMBER:					db 0x00
