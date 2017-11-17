@@ -36,7 +36,14 @@ PROTECTED_MODE:
 	call PRINT_MESSAGE
 	add esp, 16
 
-	jmp $
+	push (JMP_TO_C_KERNEL_MESSAGE - $$ + 0x10000)
+	push 3
+	push 0
+	push 0x07
+	call PRINT_MESSAGE
+	add esp, 16
+
+	jmp dword 0x08:0x10200
 
 PRINT_MESSAGE:
 	push ebp
@@ -118,8 +125,8 @@ GDT:
 
 GDT_END:
 
-PASS_MESSAGE:		db 'PASS', 0
-FAIL_MESSAGE:		db 'FAIL', 0
-
+PASS_MESSAGE:				db 'PASS', 0
+FAIL_MESSAGE:				db 'FAIL', 0
+JMP_TO_C_KERNEL_MESSAGE:	db 'Jump to C Kernel............................[    ]', 0
 
 times 512 - ($ - $$) db 0x00
