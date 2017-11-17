@@ -21,20 +21,13 @@ START:
 
 	mov si, 0		; Screen Clear에서 증가 값으로 사용 할 레지스터를 0으로 초기화
 
-.SCREEN_CLEAR_LOOP:
-	mov byte [es:si], 0					; Video memory에 0을 넣어 화면에 출력된 문자들을 지움
-	mov byte [es:si+1], 0x07			; 해당 위치의 색상값을 희색으로
-
-	add si, 2							; 2를 더해서 다음 인덱스 값으로
-
-	cmp si, 80 * 25 * 2					; Video memory의 최대 크기와 비교
-	jl .SCREEN_CLEAR_LOOP				; 현재 인덱스가 작으면 반복, 아니면 다음으로
+	call SCREEN_CLEAR_RM
 
 	push BOOTLOADER_START_MESSAGE		; Message가 적혀있는 주소의 시작 번지를 Stack에 push
 	push 0								; Y좌표 값
 	push 0								; X좌표 값
 	push 0x07							; 색상 값
-	call PRINT_MESSAGE					; PRINT_MESSAGE 호출
+	call PRINT_RM					; PRINT_RM 호출
 	add sp, 8							; Stack Pointer를 위에서 push한 만큼 증가시켜서
 										; push한 파라미터들을 제거
 
@@ -42,7 +35,7 @@ START:
 	push 1
 	push 0
 	push 0x07
-	call PRINT_MESSAGE
+	call PRINT_RM
 	add sp, 8
 
 RESET_DISK:								; BIOS 함수를 호출하여 디스크를 초기화
@@ -98,14 +91,14 @@ READ_END:
 	push 1
 	push 45
 	push 0x0A
-	call PRINT_MESSAGE
+	call PRINT_RM
 	add sp, 8
 
 	push SWITCH_MODE_MESSAGE
 	push 2
 	push 0
 	push 0x07
-	call PRINT_MESSAGE
+	call PRINT_RM
 	add sp, 8
 
 	jmp 0x1000:0x0000
@@ -115,61 +108,12 @@ DISK_ERROR_HANDLER:
 	push 1
 	push 45
 	push 0x04
-	call PRINT_MESSAGE
+	call PRINT_RM
 	
 	jmp $
 
-PRINT_MESSAGE:
-	push bp
-	mov bp, sp
 
-	push es
-	push si
-	push di
-	push ax
-	push cx
-	push dx
-
-	mov ax, 0xB800
-
-	mov es, ax
-
-	mov ax, word [bp + 8]
-	mov si, 160
-	mul si
-	mov di, ax
-
-	mov ax, word [bp + 6]
-	mov si, 2
-	mul si
-	add di, ax
-
-	mov si, word [bp + 10]
-	mov al, byte [bp + 4]
-
-.MESSAGE_LOOP:
-	mov cl, byte [si]
-
-	cmp cl, 0
-	je .MESSAGE_END
-	
-	mov byte [es:di], cl
-	mov byte [es:di+1], al
-
-	add si, 1
-	add di, 2
-
-	jmp .MESSAGE_LOOP
-
-.MESSAGE_END:
-	pop dx
-	pop cx
-	pop ax
-	pop di
-	pop si
-	pop es
-	pop bp
-	ret
+%include "Print_RM.asm"
 
 BOOTLOADER_START_MESSAGE:		db 'Boot Loader Start', 0
 
@@ -181,6 +125,7 @@ SWITCH_MODE_MESSAGE:			db 'Switch Real Mode To Protected Mode..........[    ]', 
 SECTOR_NUMBER:					db 0x02
 HEAD_NUMBER:					db 0x00
 TRACK_NUMBER:					db 0x00
+
 
 times 510 - ($ - $$) db 0x00
 
