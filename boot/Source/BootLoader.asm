@@ -94,15 +94,7 @@ READ_END:
 	call PRINT_RM
 	add sp, 8
 
-	push SWITCH_MODE_MESSAGE
-	push 2
-	push 0
-	push 0x07
-	call PRINT_RM
-	add sp, 8
-
 	jmp 0x1000:0x0000
-
 DISK_ERROR_HANDLER:
 	push ERROR_MESSAGE
 	push 1
@@ -112,20 +104,16 @@ DISK_ERROR_HANDLER:
 	
 	jmp $
 
-
-%include "Print_RM.asm"
+%include "Source/Print_RM.asm"
 
 BOOTLOADER_START_MESSAGE:		db 'Boot Loader Start', 0
-
 PASS_MESSAGE:					db 'PASS', 0
-ERROR_MESSAGE:  				db 'FAIL', 0
+ERROR_MESSAGE:					db 'FAIL', 0
 START_LOADING_IMAGE_MESSAGE:	db 'Operating System Loading....................[    ]', 0
-SWITCH_MODE_MESSAGE:			db 'Switch Real Mode To Protected Mode..........[    ]', 0
 
 SECTOR_NUMBER:					db 0x02
 HEAD_NUMBER:					db 0x00
 TRACK_NUMBER:					db 0x00
-
 
 times 510 - ($ - $$) db 0x00
 

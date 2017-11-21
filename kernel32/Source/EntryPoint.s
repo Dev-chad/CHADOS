@@ -3,11 +3,32 @@
 
 SECTION .text
 
+
 START:
 	mov ax, 0x1000
 
 	mov ds, ax
 	mov es, ax
+
+	mov ax, 0x2401
+	int 0x15
+
+	jc .A20GATE_ERROR
+	jmp .A20GATE_SUCCESS
+
+.A20GATE_ERROR:
+	in al, 0x92
+	or al, 0x02
+	and al, 0xFE
+	out 0x92, al
+
+.A20GATE_SUCCESS:
+	push (SWITCH_MODE_MESSAGE - $$ + 0x10000)
+	push 2
+	push 0
+	push 0x07
+	call PRINT_RM
+	add sp, 8
 
 	cli
 	lgdt [GDTR]
@@ -15,7 +36,7 @@ START:
 	mov eax, 0x4000003B
 	mov cr0, eax
 
-	jmp dword 0x08:(PROTECTED_MODE - $$ + 0X10000)
+	jmp dword 0x08:(PROTECTED_MODE - $$ + 0x10000)
 
 [BITS 32]
 PROTECTED_MODE:
@@ -125,8 +146,11 @@ GDT:
 
 GDT_END:
 
-PASS_MESSAGE:				db 'PASS', 0
-FAIL_MESSAGE:				db 'FAIL', 0
-JMP_TO_C_KERNEL_MESSAGE:	db 'Jump to C Kernel............................[    ]', 0
+%include "Source/Print_RM.asm"
+
+PASS_MESSAGE:					db 'PASS', 0
+FAIL_MESSAGE:					db 'FAIL', 0
+SWITCH_MODE_MESSAGE:			db 'Switch Real Mode To Protected Mode..........[    ]', 0
+JMP_TO_C_KERNEL_MESSAGE:		db 'Jump to C Kernel............................[    ]', 0
 
 times 512 - ($ - $$) db 0x00
