@@ -36,11 +36,11 @@ START:
 	mov eax, 0x4000003B
 	mov cr0, eax
 
-	jmp dword 0x08:(PROTECTED_MODE - $$ + 0x10000)
+	jmp dword 0x18:(PROTECTED_MODE - $$ + 0x10000)
 
 [BITS 32]
 PROTECTED_MODE:
-	mov ax, 0x10
+	mov ax, 0x20
 	mov ds, ax
 	mov es, ax
 	mov fs, ax
@@ -64,7 +64,7 @@ PROTECTED_MODE:
 	call PRINT_MESSAGE
 	add esp, 16
 
-	jmp dword 0x08:0x10200
+	jmp dword 0x18:0x10200
 
 PRINT_MESSAGE:
 	push ebp
@@ -126,6 +126,22 @@ GDT:
 		db 0x00
 		db 0x00
 		db 0x00
+		db 0x00
+
+	IA_32e_CODE_DESCRIPTOR:
+		dw 0xFFFF
+		dw 0x0000
+		db 0x00
+		db 0x9A
+		db 0xAF
+		db 0x00
+
+	IA_32e_DATA_DESCRIPTOR:
+		dw 0xFFFF
+		dw 0x0000
+		db 0x00
+		db 0x92
+		db 0xAF
 		db 0x00
 
 	CODE_DESCRIPTOR:

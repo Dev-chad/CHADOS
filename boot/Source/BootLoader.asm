@@ -3,9 +3,11 @@
 
 SECTION .text
 
-jmp 0x7c0:START
+jmp 0x7C0:START
 
 TOTAL_SECTOR_COUNT:	dw 0x02	; 디스크에서 읽을 섹터의 개수
+
+KERNEL32_SECTOR_COUNT: dw 0x02 ; 보호모드 커널의 총 섹터 수
 
 START:
 	mov ax, 0x07C0	; BootLoader의 Starting address를 Data Segment Register에 넣음

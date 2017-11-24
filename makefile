@@ -1,4 +1,4 @@
-all: BootLoader Kernel32 Utility Disk.img
+all: BootLoader Kernel32 Kernel64 Utility Disk.img
 
 BootLoader:
 	@echo 
@@ -22,7 +22,18 @@ Kernel32:
 	@echo ============== Build Complete ============
 	@echo
 
-Disk.img: boot/BootLoader.bin kernel32/Kernel32.bin
+Kernel64:
+	@echo
+	@echo ============== Build 64bit kernel ============
+	@echo
+	
+	make -C kernel64
+
+	@echo
+	@echo ============== Build Complete ============
+	@echo
+
+Disk.img: boot/BootLoader.bin kernel32/Kernel32.bin kernel64/Kernel64.bin
 	@echo
 	@echo ============== Disk Image Build ============
 	@echo
@@ -45,11 +56,12 @@ Utility:
 	@echo
 
 run: all
-	qemu-system-i386 -L . -fda Disk.img -localtime -M pc
+	qemu-system-x86_64 -L . -fda Disk.img -localtime -M pc
 
 clean:
 	make -C boot clean
 	make -C kernel32 clean
+	make -C kernel64 clean
 	make -C utility clean
 	rm -f Disk.img
 	rm -f ImageMaker
